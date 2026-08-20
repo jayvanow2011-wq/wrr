@@ -135,11 +135,20 @@
   background: transparent; color: var(--hc-text); cursor: pointer; transition: all 0.1s; font-family: inherit;
 }
 .hc-connect-btn:hover { background: var(--hc-surface-2); }
+.hc-connect-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .hc-back-btn {
   padding: 6px 12px; font-size: 13px; border-radius: 6px; border: 1px solid var(--hc-border);
   background: transparent; color: var(--hc-muted); cursor: pointer; margin-bottom: 16px; font-family: inherit;
 }
 .hc-back-btn:hover { color: var(--hc-text); background: var(--hc-surface-2); }
+
+.hc-mini-btn {
+  padding: 3px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--hc-border);
+  background: transparent; color: var(--hc-muted); cursor: pointer; font-family: inherit;
+}
+.hc-mini-btn:hover { color: var(--hc-text); background: var(--hc-surface-2); }
+.hc-danger-btn { color: var(--hc-red); border-color: rgba(255,68,68,0.3); }
+.hc-danger-btn:hover { background: rgba(255,68,68,0.1); color: var(--hc-red); }
 
 .hc-search { margin-bottom: 12px; }
 
@@ -151,13 +160,73 @@
 .hc-info-row:last-child { border-bottom: 0; }
 .hc-info-row span:first-child { color: var(--hc-muted); }
 
+/* Control tabs */
+.hc-ctrl-tabs {
+  display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--hc-border); padding-bottom: 8px;
+}
+.hc-ctrl-tab {
+  padding: 6px 12px; font-size: 12px; border-radius: 6px 6px 0 0; border: 1px solid transparent;
+  background: transparent; color: var(--hc-muted); cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 4px; transition: all 0.1s;
+}
+.hc-ctrl-tab:hover { color: var(--hc-text); }
+.hc-ctrl-tab.active {
+  color: var(--hc-text); background: var(--hc-surface);
+  border-color: var(--hc-border); border-bottom-color: var(--hc-surface);
+}
+
+/* Shell terminal */
+.hc-shell-output {
+  background: var(--hc-bg); border: 1px solid var(--hc-border); border-radius: 6px;
+  padding: 12px; min-height: 200px; max-height: 400px; overflow-y: auto;
+  font-family: "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.6;
+  margin-bottom: 8px;
+}
+.hc-shell-entry { margin-bottom: 8px; }
+.hc-shell-cmd { color: var(--hc-green); }
+.hc-shell-result { color: var(--hc-muted); margin: 2px 0 0; white-space: pre-wrap; font-size: 12px; font-family: inherit; }
+.hc-shell-input-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.hc-shell-input {
+  flex: 1; margin-bottom: 0 !important;
+  font-family: "SF Mono", Menlo, monospace !important;
+}
+
+/* File manager */
+.hc-file-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--hc-border); font-size: 13px;
+}
+.hc-file-row:last-child { border-bottom: 0; }
+
+/* Screen placeholder */
+.hc-screen-placeholder {
+  background: var(--hc-bg); border: 1px solid var(--hc-border); border-radius: 6px;
+  padding: 40px 20px; text-align: center;
+}
+
+/* Keylogger */
+.hc-keylog-output {
+  background: var(--hc-bg); border: 1px solid var(--hc-border); border-radius: 6px;
+  padding: 12px; min-height: 120px; max-height: 300px; overflow-y: auto;
+  font-family: "SF Mono", Menlo, monospace; font-size: 12px;
+}
+
+.hc-rec-badge {
+  color: var(--hc-red); font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  animation: hc-blink 1s infinite;
+}
+@keyframes hc-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
 /* Builder */
 .hc-builder-layout { display: grid; grid-template-columns: 1fr 340px; gap: 12px; align-items: start; }
 @media (max-width: 900px) { .hc-builder-layout { grid-template-columns: 1fr; } }
 
 .hc-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--hc-border); font-size: 13px; }
 .hc-toggle-row:last-child { border-bottom: none; }
-.hc-toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+.hc-toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
 .hc-toggle input { opacity: 0; width: 0; height: 0; }
 .hc-toggle-slider {
   position: absolute; cursor: pointer; inset: 0; background: var(--hc-surface-2);

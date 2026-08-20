@@ -11,19 +11,30 @@ import type { StatsResponse, TabId } from "./types.js";
 const root = document.getElementById("app") as HTMLElement;
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: "dashboard", label: "Dashboard", icon: "📊" },
-  { id: "clients", label: "Clients", icon: "👥" },
-  { id: "builder", label: "Builder", icon: "🔨" },
-  { id: "logs", label: "Logs", icon: "📜" },
-  { id: "settings", label: "Settings", icon: "⚙️" },
+  { id: "dashboard", label: "Dashboard", icon: "⊞" },
+  { id: "clients", label: "Clients", icon: "◉" },
+  { id: "builder", label: "Builder", icon: "▶" },
+  { id: "logs", label: "Logs", icon: "≡" },
+  { id: "settings", label: "Settings", icon: "⚙" },
 ];
 
 let currentTab: TabId = "dashboard";
 let connectedId: string | null = null;
 let data: StatsResponse | null = null;
 let sessionStart = Date.now();
+let currentUser = "user";
+let currentUserId = 0;
 
 async function showPanel(): Promise<void> {
+  try {
+    const me = await fetch("/api/me");
+    if (me.ok) {
+      const info = await me.json();
+      currentUser = info.user;
+      currentUserId = info.userId;
+    }
+  } catch {}
+
   data = await api.stats();
   sessionStart = Date.now();
 
@@ -31,17 +42,17 @@ async function showPanel(): Promise<void> {
     <div class="shell">
       <aside class="sidebar">
         <div class="brand"><span class="dot"></span> HidenCloud</div>
-        <div class="sidebar-version">v2.0.0</div>
+        <div class="sidebar-version">v2.1.0</div>
         ${TABS.map((t) => `<button class="nav-btn" data-tab="${t.id}"><span class="nav-icon">${t.icon}</span>${t.label}</button>`).join("")}
         <div class="spacer"></div>
         <div class="sidebar-status">
           <div class="status-dot online-dot"></div>
           <div>
-            <div class="sidebar-user">jayjay</div>
+            <div class="sidebar-user">${currentUser}</div>
             <div class="sidebar-timer" id="session-timer">00:00:00</div>
           </div>
         </div>
-        <button class="logout" id="logout">🚪 Sign out</button>
+        <button class="logout" id="logout">Sign out</button>
       </aside>
       <main class="main" id="view"></main>
     </div>
@@ -54,7 +65,6 @@ async function showPanel(): Promise<void> {
     </div>
   `;
 
-  // Nav buttons
   root.querySelectorAll<HTMLButtonElement>(".nav-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       currentTab = btn.dataset["tab"] as TabId;
@@ -63,13 +73,11 @@ async function showPanel(): Promise<void> {
     });
   });
 
-  // Logout
   root.querySelector<HTMLButtonElement>("#logout")!.addEventListener("click", async () => {
     await api.logout();
     boot();
   });
 
-  // Session timer
   const timerEl = root.querySelector<HTMLElement>("#session-timer")!;
   setInterval(() => {
     const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
@@ -79,9 +87,7 @@ async function showPanel(): Promise<void> {
     timerEl.textContent = `${h}:${m}:${s}`;
   }, 1000);
 
-  // Command palette
   setupCommandPalette();
-
   renderTab();
 }
 
@@ -98,31 +104,14 @@ function setupCommandPalette(): void {
     { label: "Go to Settings", action: () => { currentTab = "settings"; connectedId = null; renderTab(); } },
     { label: "Refresh Data", action: async () => { data = await api.stats(); renderTab(); } },
     { label: "Sign Out", action: async () => { await api.logout(); boot(); } },
-    { label: "Toggle Ultra Dark", action: () => {
-      const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-      const isDark = bg === "#000000";
-      document.documentElement.style.setProperty("--bg", isDark ? "#0b0e14" : "#000000");
-      document.documentElement.style.setProperty("--surface", isDark ? "#121722" : "#080808");
-      document.documentElement.style.setProperty("--surface-2", isDark ? "#171d2b" : "#0c0c0c");
-    }},
   ];
 
-  function show(): void {
-    overlay.style.display = "flex";
-    input.value = "";
-    input.focus();
-    renderCommands("");
-  }
-
-  function hide(): void {
-    overlay.style.display = "none";
-  }
+  function show(): void { overlay.style.display = "flex"; input.value = ""; input.focus(); renderCommands(""); }
+  function hide(): void { overlay.style.display = "none"; }
 
   function renderCommands(q: string): void {
     const filtered = commands.filter((c) => c.label.toLowerCase().includes(q.toLowerCase()));
-    results.innerHTML = filtered
-      .map((c, i) => `<div class="cmd-item${i === 0 ? " active" : ""}" data-idx="${i}">${c.label}</div>`)
-      .join("");
+    results.innerHTML = filtered.map((c, i) => `<div class="cmd-item${i === 0 ? " active" : ""}" data-idx="${i}">${c.label}</div>`).join("");
     results.querySelectorAll<HTMLElement>(".cmd-item").forEach((el) => {
       el.addEventListener("click", () => {
         const idx = Number(el.dataset["idx"]);
@@ -134,23 +123,9 @@ function setupCommandPalette(): void {
   }
 
   input.addEventListener("input", () => renderCommands(input.value));
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") hide();
-    if (e.key === "Enter") {
-      const first = results.querySelector<HTMLElement>(".cmd-item");
-      first?.click();
-    }
-  });
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) hide();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-      e.preventDefault();
-      overlay.style.display === "none" ? show() : hide();
-    }
-  });
+  input.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); if (e.key === "Enter") results.querySelector<HTMLElement>(".cmd-item")?.click(); });
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) hide(); });
+  document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); overlay.style.display === "none" ? show() : hide(); } });
 }
 
 async function renderTab(): Promise<void> {
@@ -159,42 +134,20 @@ async function renderTab(): Promise<void> {
     b.classList.toggle("active", b.dataset["tab"] === currentTab);
   });
 
-  if (currentTab === "dashboard") {
-    view.innerHTML = renderDashboard(data!);
-    return;
-  }
+  if (currentTab === "dashboard") { view.innerHTML = renderDashboard(data!); return; }
+  if (currentTab === "builder") { view.innerHTML = renderBuilder(); bindBuilder(view); return; }
+  if (currentTab === "logs") { view.innerHTML = renderLogs(); bindLogs(view); return; }
+  if (currentTab === "settings") { view.innerHTML = renderSettings(); bindSettings(view); return; }
 
-  if (currentTab === "builder") {
-    view.innerHTML = renderBuilder();
-    bindBuilder(view);
-    return;
-  }
-
-  if (currentTab === "logs") {
-    view.innerHTML = renderLogs();
-    bindLogs(view);
-    return;
-  }
-
-  if (currentTab === "settings") {
-    view.innerHTML = renderSettings();
-    bindSettings(view);
-    return;
-  }
-
-  // clients tab
   if (connectedId) {
     view.innerHTML = `<div class="card loading-card"><div class="loader"></div>Connecting to ${connectedId}…</div>`;
     try {
       const detail = await api.client(connectedId);
       view.innerHTML = renderAdminControl(detail);
-      bindAdminControl(view, detail, () => {
-        connectedId = null;
-        void renderTab();
-      });
+      bindAdminControl(view, detail, () => { connectedId = null; void renderTab(); });
     } catch {
       connectedId = null;
-      view.innerHTML = `<div class="card">❌ Failed to connect.</div>`;
+      view.innerHTML = `<div class="card">Failed to connect.</div>`;
     }
     return;
   }
@@ -202,10 +155,7 @@ async function renderTab(): Promise<void> {
   view.innerHTML = renderClients(data!);
   bindClients(view);
   view.querySelectorAll<HTMLButtonElement>(".connect-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      connectedId = btn.dataset["id"] ?? null;
-      void renderTab();
-    });
+    btn.addEventListener("click", () => { connectedId = btn.dataset["id"] ?? null; void renderTab(); });
   });
 }
 

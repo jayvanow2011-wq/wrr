@@ -1,19 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "HidenCloud Panel — Node.js Control Panel Source" },
+      { title: "HidenCloud — Control Panel" },
       {
         name: "description",
-        content:
-          "HidenCloud is a dark-themed TypeScript control panel with dashboard, clients and builder tabs, served by a plain Node.js Express server.",
+        content: "HidenCloud dark control panel with dashboard, clients and builder.",
       },
-      { property: "og:title", content: "HidenCloud Panel — Node.js Control Panel Source" },
+      { property: "og:title", content: "HidenCloud — Control Panel" },
       {
         property: "og:description",
-        content:
-          "Dark TypeScript control panel with dashboard, clients and builder tabs, ready to host on any Node.js server.",
+        content: "Dark control panel with dashboard, clients and builder.",
       },
     ],
   }),
@@ -21,23 +20,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return (
-    <div className="min-h-screen bg-background text-foreground dark">
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-6 px-6 py-16">
-        <h1 className="text-3xl font-bold tracking-tight">HidenCloud Panel</h1>
-        <p className="text-muted-foreground">
-          The full site lives in the <code>hidencloud/</code> folder: a dark-themed TypeScript
-          frontend in <code>src/app</code> served by <code>server.js</code> (Express) with login and
-          a dashboard containing Dashboard, Clients and Builder tabs.
-        </p>
-        <pre className="rounded-lg border border-border bg-card p-4 text-sm">
-          {`cd hidencloud\nnpm install\nnpm start   # http://localhost:3000`}
-        </pre>
-        <p className="text-sm text-muted-foreground">
-          Login: <strong>jayjay</strong> / <strong>jayjay100!</strong> (override with PANEL_USER and
-          PANEL_PASS).
-        </p>
-      </main>
-    </div>
-  );
+  const rootRef = useRef<HTMLDivElement>(null);
+  const loadedRef = useRef(false);
+
+  useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+
+    // Load hidencloud CSS
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/hidencloud/css/style.css";
+    document.head.appendChild(link);
+
+    // Load hidencloud JS
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = "/hidencloud/js/main.js";
+    document.body.appendChild(script);
+  }, []);
+
+  return <div id="app" ref={rootRef} className="hidencloud-root" />;
 }

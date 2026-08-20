@@ -5,14 +5,16 @@ import { HCDashboard } from "./HCDashboard";
 import { HCClients } from "./HCClients";
 import { HCBuilder } from "./HCBuilder";
 import { HCLogs } from "./HCLogs";
+import { HCSettings } from "./HCSettings";
 
-type Tab = "dashboard" | "clients" | "builder" | "logs";
+type Tab = "dashboard" | "clients" | "builder" | "logs" | "settings";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: "⊞" },
   { id: "clients", label: "Clients", icon: "◉" },
   { id: "builder", label: "Builder", icon: "▶" },
   { id: "logs", label: "Logs", icon: "≡" },
+  { id: "settings", label: "Settings", icon: "⚙" },
 ];
 
 export function HCPanel() {
@@ -37,6 +39,13 @@ export function HCPanel() {
   useEffect(() => {
     if (!authed) return;
     const t = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [authed]);
+
+  // Auto-refresh stats every 10s
+  useEffect(() => {
+    if (!authed) return;
+    const t = setInterval(loadData, 10000);
     return () => clearInterval(t);
   }, [authed]);
 
@@ -76,7 +85,7 @@ export function HCPanel() {
       <div className="hc-shell">
         <aside className="hc-sidebar">
           <div className="hc-brand"><span className="hc-dot" /> HidenCloud</div>
-          <div className="hc-version">v2.1.0</div>
+          <div className="hc-version">v2.2.0</div>
           {TABS.map(t => (
             <button
               key={t.id}
@@ -101,6 +110,7 @@ export function HCPanel() {
           {tab === "clients" && <HCClients data={data} />}
           {tab === "builder" && <HCBuilder />}
           {tab === "logs" && <HCLogs />}
+          {tab === "settings" && <HCSettings />}
         </main>
       </div>
     </div>

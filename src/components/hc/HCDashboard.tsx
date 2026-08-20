@@ -12,7 +12,7 @@ export function HCDashboard({ data }: { data: any }) {
     { label: "Offline", value: a.offline, delta: `${offlinePct}%`, tone: "warn" },
     { label: "Idle", value: a.idle, delta: `${idlePct}%`, tone: "idle" },
     { label: "Countries", value: a.countries, delta: "worldwide", tone: "" },
-    { label: "Commands Sent", value: a.commandsSent, delta: "last 24h", tone: "" },
+    { label: "Builds", value: a.builds || 0, delta: "total", tone: "" },
   ];
 
   return (

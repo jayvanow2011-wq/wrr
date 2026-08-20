@@ -45,10 +45,27 @@ export const hcApi = {
   clearLogs() {
     return post<{ ok: true }>("/api/logs");
   },
-  sendCommand(clientId: string, action: string) {
-    return post<{ ok: true; result: string }>(`/api/command/${encodeURIComponent(clientId)}`, { action });
+  sendCommand(clientId: string, action: string, shell?: string) {
+    return post<{ ok: true; result: string }>(`/api/command/${encodeURIComponent(clientId)}`, { action, shell });
   },
   build(cfg: any) {
     return post<any>("/api/build", cfg);
+  },
+  async settings(): Promise<{ ok: boolean; webhookUrl: string }> {
+    const res = await fetch("/api/settings");
+    if (!res.ok) throw new Error("Not authorized");
+    return res.json();
+  },
+  saveSettings(data: { webhookUrl: string }) {
+    return post<{ ok: true }>("/api/settings", data);
+  },
+  testWebhook() {
+    return post<{ ok: true }>("/api/settings/test-webhook");
+  },
+  async builds(): Promise<any[]> {
+    const res = await fetch("/api/builds");
+    if (!res.ok) throw new Error("Not authorized");
+    const data = await res.json();
+    return data.builds;
   },
 };

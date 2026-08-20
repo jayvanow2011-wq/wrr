@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { HCPanel } from "@/components/hc/HCPanel";
+import "@/components/hc/hc-styles.css";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,31 +15,13 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Dark control panel with dashboard, clients and builder.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
 });
 
 function Index() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const loadedRef = useRef(false);
-
-  useEffect(() => {
-    if (loadedRef.current) return;
-    loadedRef.current = true;
-
-    // Load hidencloud CSS
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "/hidencloud/css/style.css";
-    document.head.appendChild(link);
-
-    // Load hidencloud JS
-    const script = document.createElement("script");
-    script.type = "module";
-    script.src = "/hidencloud/js/main.js";
-    document.body.appendChild(script);
-  }, []);
-
-  return <div id="app" ref={rootRef} className="hidencloud-root" />;
+  return <HCPanel />;
 }
